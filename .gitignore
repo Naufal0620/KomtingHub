@@ -24,3 +24,4 @@ Homestead.yaml
 Thumbs.db
 /AGENT.md
 /Development
+/deploy.sh
