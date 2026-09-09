@@ -1,0 +1,73 @@
+<x-app-layout>
+    <x-slot name="title">Beranda</x-slot>
+
+    <x-ui.page-header title="Selamat Datang Kembali" :subtitle="'Berikut hal yang terjadi di kelas kamu, ' . Auth::user()->name . '.'" />
+
+    {{-- Stats --}}
+    <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-5">
+        <x-ui.stat-card label="Kelas Saya" :value="$classRooms->count()" tone="rose">
+            <x-slot name="icon"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg></x-slot>
+        </x-ui.stat-card>
+        <x-ui.stat-card label="Mata Pelajaran" :value="$subjects->count()" tone="rose-deep">
+            <x-slot name="icon"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg></x-slot>
+        </x-ui.stat-card>
+        <x-ui.stat-card label="Kelompok" :value="$groupCount" tone="green">
+            <x-slot name="icon"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg></x-slot>
+        </x-ui.stat-card>
+    </div>
+
+    {{-- All enrolled classes --}}
+    <x-ui.card title="Kelas Saya">
+        <x-slot name="action"><span class="text-xs text-gray-400">{{ $classRooms->count() }} terdaftar</span></x-slot>
+        @forelse ($classRooms as $classRoom)
+            <a href="{{ route('class-rooms.show', $classRoom) }}"
+               class="group mb-3 flex items-center justify-between gap-3 rounded-md p-3 transition hover:bg-gray-50 last:mb-0">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-rose-50 text-sm font-bold text-rose-700">
+                        {{ Str::limit($classRoom->name, 2, '') }}
+                    </span>
+                    <div class="min-w-0">
+                        <p class="truncate font-semibold text-gray-900 group-hover:text-rose-800">{{ $classRoom->name }}</p>
+                        <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                            <span class="badge-rose">{{ $classRoom->code }}</span>
+                            <span>{{ $classRoom->subjects_count }} mata pelajaran</span>
+                        </div>
+                    </div>
+                </div>
+                <svg class="h-5 w-5 shrink-0 text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+        @empty
+            <x-ui.empty-state
+                title="Belum ada kelas"
+                description="Kamu belum bergabung di ruang kelas mana pun. Minta komting kamu untuk menambahkanmu." />
+        @endforelse
+    </x-ui.card>
+
+    {{-- Subjects --}}
+    <x-ui.card title="Mata Pelajaran Saya">
+        <x-slot name="action"><span class="text-xs text-gray-400">{{ $subjects->count() }} terdaftar</span></x-slot>
+        @forelse ($subjects as $subject)
+            <a href="{{ route('class-rooms.subjects.show', [$subject->class_room_id, $subject]) }}"
+               class="group mb-3 flex items-center justify-between gap-3 rounded-md p-3 transition hover:bg-gray-50 last:mb-0">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-rose-50 text-sm font-bold text-rose-700">
+                        {{ Str::limit($subject->name, 2, '') }}
+                    </span>
+                    <div class="min-w-0">
+                        <p class="truncate font-semibold text-gray-900 group-hover:text-rose-800">{{ $subject->name }}</p>
+                        <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
+                            <span class="badge-rose">{{ $subject->code }}</span>
+                            <span>{{ $subject->groups_count }} kelompok</span>
+                            <span>{{ $subject->assignments_count }} tugas</span>
+                        </div>
+                    </div>
+                </div>
+                <svg class="h-5 w-5 shrink-0 text-gray-300 transition group-hover:translate-x-0.5 group-hover:text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            </a>
+        @empty
+            <x-ui.empty-state
+                title="Belum ada mata pelajaran"
+                description="Kamu belum terdaftar di mata pelajaran mana pun. Minta komting kamu untuk menambahkanmu." />
+        @endforelse
+    </x-ui.card>
+</x-app-layout>
