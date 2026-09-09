@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\ClassRoom;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -9,6 +11,10 @@ use Illuminate\Database\Seeder;
 class StudentSeeder extends Seeder
 {
     use WithoutModelEvents;
+
+    public const DEFAULT_CLASS_CODE = 'DEFAULT';
+
+    public const DEFAULT_SUBJECT_CODE = 'DEFAULT-1';
 
     /**
      * Daftar akun mahasiswa yang akan dibuat.
@@ -59,12 +65,15 @@ class StudentSeeder extends Seeder
     ];
 
     /**
-     * Seed the application's student accounts.
+     * Seed the application's student accounts and enroll them into the
+     * default classroom and its default subject.
      */
     public function run(): void
     {
+        $studentIds = [];
+
         foreach ($this->students as $student) {
-            User::updateOrCreate(
+            $user = User::updateOrCreate(
                 ['email' => $student['email']],
                 [
                     'name' => $student['name'],
@@ -73,6 +82,28 @@ class StudentSeeder extends Seeder
                     'email_verified_at' => now(),
                 ]
             );
+            $studentIds[] = $user->id;
         }
+
+        $classRoom = ClassRoom::updateOrCreate(
+            ['code' => self::DEFAULT_CLASS_CODE],
+            [
+                'name' => 'Kelas Default',
+                'description' => 'Kelas default untuk akun mahasiswa bawaan.',
+                'komting_id' => User::where('email', 'komting@example.com')->value('id'),
+            ]
+        );
+
+        $subject = Subject::firstOrCreate(
+            ['class_room_id' => $classRoom->id, 'code' => self::DEFAULT_SUBJECT_CODE],
+            [
+                'name' => 'Mata Pelajaran Default',
+                'description' => 'Mata pelajaran default untuk akun mahasiswa bawaan.',
+                'group_mode' => Subject::GROUP_MODE_SELECT,
+            ]
+        );
+
+        $classRoom->members()->syncWithoutDetaching($studentIds);
+        $subject->members()->syncWithoutDetaching($studentIds);
     }
 }

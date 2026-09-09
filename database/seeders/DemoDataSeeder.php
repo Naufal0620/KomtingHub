@@ -35,7 +35,7 @@ class DemoDataSeeder extends Seeder
             'description' => 'Demo class for the KomtingHub system.',
         ]);
 
-        $students = User::factory()->count(20)->student()->create();
+        $students = User::where('role', User::ROLE_STUDENT)->latest('id')->get();
         $classRoom->members()->attach($students->pluck('id'));
 
         $this->seedSelectSubject($classRoom, $students);
